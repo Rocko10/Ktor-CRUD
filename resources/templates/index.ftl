@@ -1,10 +1,5 @@
-<#-- @ftlvariable name="data" type="com.monkeys.IndexData" -->
 <html>
     <body>
-        <ul>
-        <#list data.items as item>
-            <li>${item}</li>
-        </#list>
-        </ul>
+        <h2>${name}</h2>
     </body>
 </html>
