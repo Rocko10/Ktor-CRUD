@@ -1,5 +1,10 @@
 package com.monkeys
 
+import com.monkeys.config.dbConnect
+import com.monkeys.repository.Monkey
+import com.monkeys.repository.MonkeyRepository
+import com.monkeys.service.GetMonkeysService
+import com.monkeys.service.GetMonkeysServiceImp
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -9,8 +14,21 @@ import freemarker.cache.*
 import io.ktor.freemarker.*
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.koin.dsl.module.module
+import org.koin.ktor.ext.inject
+import org.koin.standalone.StandAloneContext.startKoin
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+val monkeysModule = module {
+    single { GetMonkeysServiceImp(MonkeyRepository()) as GetMonkeysService }
+}
+
+fun main(args: Array<String>): Unit {
+    startKoin(listOf(monkeysModule))
+    io.ktor.server.netty.EngineMain.main(args)
+}
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
@@ -19,16 +37,34 @@ fun Application.module(testing: Boolean = false) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
 
+    dbConnect()
+
+    val getMonkeysService by inject<GetMonkeysService>()
+
     val client = HttpClient(Apache) {
     }
 
     routing {
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
+
+            var monkeys: List<Monkey?> = listOf()
+
+            withContext(Dispatchers.IO) {
+                transaction {
+                    monkeys = getMonkeysService.execute()
+                }
+            }
+
+            call.respond(FreeMarkerContent(
+                "monkeys/index.ftl",
+                mapOf("monkeys" to monkeys, "size" to monkeys.size),
+                ""
+                )
+            )
         }
 
         get("/html-freemarker") {
-            call.respond(FreeMarkerContent("index.ftl", mapOf("data" to IndexData(listOf(1, 2, 3))), ""))
+            call.respond(FreeMarkerContent("index.ftl", mapOf("name" to "Jerry"), ""))
         }
     }
 }

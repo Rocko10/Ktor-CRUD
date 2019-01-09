@@ -7,7 +7,7 @@ interface GetMonkeysService {
     fun execute(): List<Monkey?>
 }
 
-class GetMonkeysServiceImp(private val monkeyGateway: MonkeyGateway) : GetMonkeysService{
+class GetMonkeysServiceImp(private val monkeyGateway: MonkeyGateway) : GetMonkeysService {
     override fun execute(): List<Monkey?> {
         return this.monkeyGateway.getMonkeys()
     }
