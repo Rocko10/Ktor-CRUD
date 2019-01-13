@@ -1,4 +1,4 @@
-# Ktor CRUD example (WIP)
+# Ktor CRUD example
 
 ## Getting Started
 
