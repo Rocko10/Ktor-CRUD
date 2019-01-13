@@ -3,6 +3,9 @@ package com.monkeys
 import com.monkeys.config.dbConnect
 import com.monkeys.repository.Monkey
 import com.monkeys.repository.MonkeyRepository
+import com.monkeys.repository.NewMonkey
+import com.monkeys.service.CreateMonkeyService
+import com.monkeys.service.CreateMonkeyServiceImp
 import com.monkeys.service.GetMonkeysService
 import com.monkeys.service.GetMonkeysServiceImp
 import io.ktor.application.*
@@ -23,6 +26,7 @@ import org.koin.standalone.StandAloneContext.startKoin
 
 val monkeysModule = module {
     single { GetMonkeysServiceImp(MonkeyRepository()) as GetMonkeysService }
+    single { CreateMonkeyServiceImp(MonkeyRepository()) as CreateMonkeyService }
 }
 
 fun main(args: Array<String>): Unit {
@@ -40,13 +44,13 @@ fun Application.module(testing: Boolean = false) {
     dbConnect()
 
     val getMonkeysService by inject<GetMonkeysService>()
+    val createMonkeyService by inject<CreateMonkeyService>()
 
     val client = HttpClient(Apache) {
     }
 
     routing {
         get("/") {
-
             var monkeys: List<Monkey?> = listOf()
 
             withContext(Dispatchers.IO) {
@@ -61,6 +65,21 @@ fun Application.module(testing: Boolean = false) {
                 ""
                 )
             )
+        }
+
+        get("/new") {
+            call.respond(FreeMarkerContent("monkeys/new.ftl", null))
+        }
+
+        post("/new") {
+            val name: String? = call.receiveParameters()["name"]
+
+            withContext(Dispatchers.IO) {
+                transaction {
+                    createMonkeyService.execute(NewMonkey(id = null, name = name!!))
+                }
+                call.respondRedirect("/")
+            }
         }
 
         get("/html-freemarker") {
