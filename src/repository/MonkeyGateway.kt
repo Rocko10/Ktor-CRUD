@@ -7,6 +7,7 @@ interface MonkeyGateway {
     fun createMonkey(newMonkey: NewMonkey): Boolean
     fun updateMonkey(id: Int, name: String)
     fun showMonkey(id: Int): Monkey?
+    fun deleteMonkey(id: Int)
 }
 
 data class Monkey(val id: Int, var name: String)
@@ -47,5 +48,8 @@ class MonkeyRepository : MonkeyGateway {
         val query = Monkeys.select { Monkeys.id.eq(id) }.firstOrNull() ?: return null
 
         return Monkey(query[Monkeys.id], query[Monkeys.name])
+    }
+
+    override fun deleteMonkey(id: Int) {
     }
 }

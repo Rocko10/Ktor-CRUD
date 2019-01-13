@@ -13,6 +13,7 @@ import org.koin.standalone.StandAloneContext.startKoin
 import org.koin.standalone.StandAloneContext.stopKoin
 import org.koin.standalone.inject
 import org.koin.test.KoinTest
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 var monkeys = mutableListOf<Monkey>()
@@ -48,6 +49,14 @@ class MonkeyTestRepository : MonkeyGateway {
 
         return null
     }
+
+    override fun deleteMonkey(id: Int) {
+        for (monkey in monkeys) {
+            if (monkey.id == id) {
+                monkeys.remove(monkey)
+            }
+        }
+    }
 }
 
 class ServiceMonkeyTest : KoinTest {
@@ -56,6 +65,7 @@ class ServiceMonkeyTest : KoinTest {
     private val createMonkeyService by inject<CreateMonkeyService>()
     private val updateMonkeyService by inject<UpdateMonkeyService>()
     private val showMonkeyService by inject<ShowMonkeyService>()
+    private val deleteMonkeyService by inject<DeleteMonkeyService>()
 
     private val getMonkeysTestModule = module {
         single { MonkeyTestRepository() as MonkeyGateway}
@@ -63,6 +73,7 @@ class ServiceMonkeyTest : KoinTest {
         single { CreateMonkeyServiceImp(MonkeyTestRepository()) as CreateMonkeyService}
         single { UpdateMonkeyServiceImp(MonkeyTestRepository()) as UpdateMonkeyService }
         single { ShowMonkeyServiceImp(MonkeyTestRepository()) as ShowMonkeyService }
+        single { DeleteMonkeyServiceImp(MonkeyTestRepository()) as DeleteMonkeyService }
     }
 
     @Before
@@ -128,5 +139,20 @@ class ServiceMonkeyTest : KoinTest {
         val m2: Monkey? = showMonkeyService.execute(5)
 
         assertEquals(m2, null)
+    }
+
+    @Test
+    fun testDeleteMonkey() {
+        var monkeys: List<Monkey?> = getMonkeysService.execute()
+
+        assertEquals(monkeys.size, 3)
+        assertEquals(showMonkeyService.execute(2)?.name, "Jeffrey")
+
+        deleteMonkeyService.execute(2)
+
+        monkeys = getMonkeysService.execute()
+
+        assertEquals(monkeys.size, 2)
+        assertNull(showMonkeyService.execute(2))
     }
 }
