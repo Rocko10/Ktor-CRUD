@@ -9,7 +9,10 @@
                 <p>
                 [${monkey.id}]: ${monkey.name}
                 <a href="/edit?id=${monkey.id}">Update</a>
-                <a href="#">Delete</a>
+                <form action="/delete" method="POST">
+                    <input type="hidden" name="id" value="${monkey.id}" />
+                    <button>Delete</button>
+                </form>
                 </p>
             </#list>
         <#else>

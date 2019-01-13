@@ -51,5 +51,8 @@ class MonkeyRepository : MonkeyGateway {
     }
 
     override fun deleteMonkey(id: Int) {
+        Monkeys.deleteWhere {
+            Monkeys.id eq id
+        }
     }
 }

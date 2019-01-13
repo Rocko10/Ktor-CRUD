@@ -26,6 +26,7 @@ val monkeysModule = module {
     single { CreateMonkeyServiceImp(MonkeyRepository()) as CreateMonkeyService }
     single { ShowMonkeyServiceImp(MonkeyRepository()) as ShowMonkeyService }
     single { UpdateMonkeyServiceImp(MonkeyRepository()) as UpdateMonkeyService }
+    single { DeleteMonkeyServiceImp(MonkeyRepository()) as DeleteMonkeyService }
 }
 
 fun main(args: Array<String>): Unit {
@@ -46,6 +47,7 @@ fun Application.module(testing: Boolean = false) {
     val createMonkeyService by inject<CreateMonkeyService>()
     val showMonkeyService by inject<ShowMonkeyService>()
     val updateMonkeyService by inject<UpdateMonkeyService>()
+    val deleteMonkeyService by inject<DeleteMonkeyService>()
 
     val client = HttpClient(Apache) {
     }
@@ -111,8 +113,16 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
-        get("/html-freemarker") {
-            call.respond(FreeMarkerContent("index.ftl", mapOf("name" to "Jerry"), ""))
+        post("/delete") {
+            val id = call.receiveParameters()["id"]!!.toInt()
+
+            withContext(Dispatchers.IO) {
+                transaction {
+                    deleteMonkeyService.execute(id)
+                }
+
+                call.respondRedirect("/")
+            }
         }
     }
 }
