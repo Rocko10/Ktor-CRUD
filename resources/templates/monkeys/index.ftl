@@ -8,7 +8,7 @@
             <#list monkeys as monkey>
                 <p>
                 [${monkey.id}]: ${monkey.name}
-                <a href="#">Update</a>
+                <a href="/edit?id=${monkey.id}">Update</a>
                 <a href="#">Delete</a>
                 </p>
             </#list>

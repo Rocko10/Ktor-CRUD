@@ -4,10 +4,7 @@ import com.monkeys.config.dbConnect
 import com.monkeys.repository.Monkey
 import com.monkeys.repository.MonkeyRepository
 import com.monkeys.repository.NewMonkey
-import com.monkeys.service.CreateMonkeyService
-import com.monkeys.service.CreateMonkeyServiceImp
-import com.monkeys.service.GetMonkeysService
-import com.monkeys.service.GetMonkeysServiceImp
+import com.monkeys.service.*
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -27,6 +24,8 @@ import org.koin.standalone.StandAloneContext.startKoin
 val monkeysModule = module {
     single { GetMonkeysServiceImp(MonkeyRepository()) as GetMonkeysService }
     single { CreateMonkeyServiceImp(MonkeyRepository()) as CreateMonkeyService }
+    single { ShowMonkeyServiceImp(MonkeyRepository()) as ShowMonkeyService }
+    single { UpdateMonkeyServiceImp(MonkeyRepository()) as UpdateMonkeyService }
 }
 
 fun main(args: Array<String>): Unit {
@@ -45,6 +44,8 @@ fun Application.module(testing: Boolean = false) {
 
     val getMonkeysService by inject<GetMonkeysService>()
     val createMonkeyService by inject<CreateMonkeyService>()
+    val showMonkeyService by inject<ShowMonkeyService>()
+    val updateMonkeyService by inject<UpdateMonkeyService>()
 
     val client = HttpClient(Apache) {
     }
@@ -68,7 +69,7 @@ fun Application.module(testing: Boolean = false) {
         }
 
         get("/new") {
-            call.respond(FreeMarkerContent("monkeys/new.ftl", null))
+            call.respond(FreeMarkerContent("monkeys/new.ftl", mapOf("name" to "", "id" to -1, "url" to "/new")))
         }
 
         post("/new") {
@@ -78,6 +79,34 @@ fun Application.module(testing: Boolean = false) {
                 transaction {
                     createMonkeyService.execute(NewMonkey(id = null, name = name!!))
                 }
+                call.respondRedirect("/")
+            }
+        }
+
+        get("/edit") {
+            val id: Int = call.request.queryParameters["id"]!!.toInt()
+            var monkey: Monkey? = null
+
+            withContext(Dispatchers.IO) {
+                transaction {
+                    monkey = showMonkeyService.execute(id)
+                }
+                call.respond(FreeMarkerContent("monkeys/new.ftl",
+                    mapOf("name" to monkey!!.name, "id" to monkey!!.id,"url" to "/update")))
+            }
+        }
+
+        post("/update") {
+            val params = call.receiveParameters()
+            println(params)
+            val id = params["id"]!!
+            val name = params["name"]!!
+
+            withContext(Dispatchers.IO) {
+                transaction {
+                    updateMonkeyService.execute(mapOf("id" to id, "name" to name))
+                }
+
                 call.respondRedirect("/")
             }
         }

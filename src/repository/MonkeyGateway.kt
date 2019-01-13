@@ -44,6 +44,8 @@ class MonkeyRepository : MonkeyGateway {
     }
 
     override fun showMonkey(id: Int): Monkey? {
-        return null
+        val query = Monkeys.select { Monkeys.id.eq(id) }.firstOrNull() ?: return null
+
+        return Monkey(query[Monkeys.id], query[Monkeys.name])
     }
 }
