@@ -8,9 +8,10 @@ import org.jetbrains.exposed.sql.selectAll
 interface MonkeyGateway {
     fun getMonkeys(): List<Monkey?>
     fun createMonkey(newMonkey: NewMonkey): Boolean
+    fun updateMonkey(id: Int, name: String)
 }
 
-data class Monkey(val id: Int, val name: String)
+data class Monkey(val id: Int, var name: String)
 data class NewMonkey(val id: Int?, val name: String)
 
 object Monkeys : Table() {
@@ -36,5 +37,9 @@ class MonkeyRepository : MonkeyGateway {
         } get Monkeys.id
 
         return id ?: -1 >= 0
+    }
+
+    override fun updateMonkey(id: Int, name: String) {
+
     }
 }
