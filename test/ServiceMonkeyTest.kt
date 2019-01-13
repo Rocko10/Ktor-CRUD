@@ -15,11 +15,7 @@ import org.koin.standalone.inject
 import org.koin.test.KoinTest
 import kotlin.test.assertTrue
 
-var monkeys = mutableListOf(
-    Monkey(1, "Mojo"),
-    Monkey(2, "Jeffrey"),
-    Monkey(3, "Patrick")
-)
+var monkeys = mutableListOf<Monkey>()
 
 class MonkeyTestRepository : MonkeyGateway {
     override fun getMonkeys(): List<Monkey?> {
@@ -42,6 +38,16 @@ class MonkeyTestRepository : MonkeyGateway {
             }
         }
     }
+
+    override fun showMonkey(id: Int): Monkey? {
+        for (m in monkeys) {
+            if (m.id == id) {
+                return m
+            }
+        }
+
+        return null
+    }
 }
 
 class ServiceMonkeyTest : KoinTest {
@@ -49,17 +55,24 @@ class ServiceMonkeyTest : KoinTest {
     private val getMonkeysService by inject<GetMonkeysService>()
     private val createMonkeyService by inject<CreateMonkeyService>()
     private val updateMonkeyService by inject<UpdateMonkeyService>()
+    private val showMonkeyService by inject<ShowMonkeyService>()
 
-    val getMonkeysTestModule = module {
+    private val getMonkeysTestModule = module {
         single { MonkeyTestRepository() as MonkeyGateway}
         single { GetMonkeysServiceImp(MonkeyTestRepository()) as GetMonkeysService }
         single { CreateMonkeyServiceImp(MonkeyTestRepository()) as CreateMonkeyService}
         single { UpdateMonkeyServiceImp(MonkeyTestRepository()) as UpdateMonkeyService }
+        single { ShowMonkeyServiceImp(MonkeyTestRepository()) as ShowMonkeyService }
     }
 
     @Before
     fun before() {
         startKoin(listOf(getMonkeysTestModule))
+        monkeys = mutableListOf(
+            Monkey(1, "Mojo"),
+            Monkey(2, "Jeffrey"),
+            Monkey(3, "Patrick")
+        )
     }
 
     @After
@@ -104,5 +117,16 @@ class ServiceMonkeyTest : KoinTest {
         monkeys = getMonkeysService.execute()
 
         assertEquals(monkeys[0]?.name, "Mojo II")
+    }
+
+    @Test
+    fun testShowMonkey() {
+        val m1: Monkey? = showMonkeyService.execute(1)
+
+        assertEquals(m1!!.name, "Mojo")
+
+        val m2: Monkey? = showMonkeyService.execute(5)
+
+        assertEquals(m2, null)
     }
 }

@@ -1,14 +1,12 @@
 package com.monkeys.repository
 
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 
 interface MonkeyGateway {
     fun getMonkeys(): List<Monkey?>
     fun createMonkey(newMonkey: NewMonkey): Boolean
     fun updateMonkey(id: Int, name: String)
+    fun showMonkey(id: Int): Monkey?
 }
 
 data class Monkey(val id: Int, var name: String)
@@ -32,7 +30,7 @@ class MonkeyRepository : MonkeyGateway {
     }
 
     override fun createMonkey(newMonkey: NewMonkey): Boolean {
-        val id =Monkeys.insert {
+        val id = Monkeys.insert {
             it[name] = newMonkey.name
         } get Monkeys.id
 
@@ -40,6 +38,12 @@ class MonkeyRepository : MonkeyGateway {
     }
 
     override fun updateMonkey(id: Int, name: String) {
+        Monkeys.update({ Monkeys.id eq id }) {
+            it[Monkeys.name] = name
+        }
+    }
 
+    override fun showMonkey(id: Int): Monkey? {
+        return null
     }
 }
