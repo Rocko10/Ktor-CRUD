@@ -14,10 +14,6 @@ fun dbConnect() {
     transaction { SchemaUtils.create(Monkeys) }
 }
 
-suspend fun <T> dbQuery(query: () -> T): T = withContext(Dispatchers.IO) {
-    transaction { query() }
-}
-
 private fun getConnection(): HikariDataSource {
     val config = HikariConfig()
     config.driverClassName = "org.h2.Driver"
