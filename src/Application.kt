@@ -29,14 +29,11 @@ val monkeysModule = module {
     single { DeleteMonkeyServiceImp(MonkeyRepository()) as DeleteMonkeyService }
 }
 
-fun main(args: Array<String>): Unit {
-    startKoin(listOf(monkeysModule))
-    io.ktor.server.netty.EngineMain.main(args)
-}
-
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    startKoin(listOf(monkeysModule))
+
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
