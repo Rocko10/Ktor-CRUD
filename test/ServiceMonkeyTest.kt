@@ -6,13 +6,13 @@ import com.monkeys.repository.NewMonkey
 import com.monkeys.service.*
 import org.junit.After
 import org.junit.Before
-import kotlin.test.assertEquals
 import org.junit.Test
-import org.koin.dsl.module.module
-import org.koin.standalone.StandAloneContext.startKoin
-import org.koin.standalone.StandAloneContext.stopKoin
-import org.koin.standalone.inject
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.koin.test.inject
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -68,17 +68,17 @@ class ServiceMonkeyTest : KoinTest {
     private val deleteMonkeyService by inject<DeleteMonkeyService>()
 
     private val getMonkeysTestModule = module {
-        single { MonkeyTestRepository() as MonkeyGateway}
-        single { GetMonkeysServiceImp(MonkeyTestRepository()) as GetMonkeysService }
-        single { CreateMonkeyServiceImp(MonkeyTestRepository()) as CreateMonkeyService}
-        single { UpdateMonkeyServiceImp(MonkeyTestRepository()) as UpdateMonkeyService }
-        single { ShowMonkeyServiceImp(MonkeyTestRepository()) as ShowMonkeyService }
-        single { DeleteMonkeyServiceImp(MonkeyTestRepository()) as DeleteMonkeyService }
+        single<MonkeyGateway> { MonkeyTestRepository() }
+        single<GetMonkeysService> { GetMonkeysServiceImp(MonkeyTestRepository()) }
+        single<CreateMonkeyService> { CreateMonkeyServiceImp(MonkeyTestRepository()) }
+        single<UpdateMonkeyService> { UpdateMonkeyServiceImp(MonkeyTestRepository()) }
+        single<ShowMonkeyService> { ShowMonkeyServiceImp(MonkeyTestRepository()) }
+        single<DeleteMonkeyService> { DeleteMonkeyServiceImp(MonkeyTestRepository()) }
     }
 
     @Before
     fun before() {
-        startKoin(listOf(getMonkeysTestModule))
+        startKoin { modules(listOf(getMonkeysTestModule)) }
         monkeys = mutableListOf(
             Monkey(1, "Mojo"),
             Monkey(2, "Jeffrey"),

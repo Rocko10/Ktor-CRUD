@@ -5,34 +5,41 @@ import com.monkeys.repository.Monkey
 import com.monkeys.repository.MonkeyRepository
 import com.monkeys.repository.NewMonkey
 import com.monkeys.service.*
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import freemarker.cache.*
-import io.ktor.freemarker.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
+import freemarker.cache.ClassTemplateLoader
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.freemarker.FreeMarker
+import io.ktor.freemarker.FreeMarkerContent
+import io.ktor.request.receiveParameters
+import io.ktor.response.respond
+import io.ktor.response.respondRedirect
+import io.ktor.routing.get
+import io.ktor.routing.post
+import io.ktor.routing.routing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.koin.dsl.module.module
+import org.koin.dsl.module
+import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
-import org.koin.standalone.StandAloneContext.startKoin
 
 val monkeysModule = module {
-    single { GetMonkeysServiceImp(MonkeyRepository()) as GetMonkeysService }
-    single { CreateMonkeyServiceImp(MonkeyRepository()) as CreateMonkeyService }
-    single { ShowMonkeyServiceImp(MonkeyRepository()) as ShowMonkeyService }
-    single { UpdateMonkeyServiceImp(MonkeyRepository()) as UpdateMonkeyService }
-    single { DeleteMonkeyServiceImp(MonkeyRepository()) as DeleteMonkeyService }
+    single<GetMonkeysService> { GetMonkeysServiceImp(MonkeyRepository()) }
+    single<CreateMonkeyService> { CreateMonkeyServiceImp(MonkeyRepository()) }
+    single<ShowMonkeyService> { ShowMonkeyServiceImp(MonkeyRepository()) }
+    single<UpdateMonkeyService> { UpdateMonkeyServiceImp(MonkeyRepository()) }
+    single<DeleteMonkeyService> { DeleteMonkeyServiceImp(MonkeyRepository()) }
 }
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-    startKoin(listOf(monkeysModule))
+    install(Koin) {
+        modules(monkeysModule)
+    }
 
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
