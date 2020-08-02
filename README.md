@@ -19,6 +19,14 @@ This project is an example on how to use the following technologies:
 
 WIP
 
+## Running
+
+At the root level of the project, run:
+
+```
+$ ./gradlew run
+```
+
 ## Running the tests
 
 At the root level of the project, run:

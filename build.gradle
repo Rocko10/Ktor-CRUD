@@ -37,11 +37,11 @@ dependencies {
     compile "io.ktor:ktor-client-core:$ktor_version"
     compile "io.ktor:ktor-client-core-jvm:$ktor_version"
     compile "io.ktor:ktor-client-apache:$ktor_version"
-    compile 'org.koin:koin-ktor:1.0.2'
+    compile "org.koin:koin-ktor:$koin_version"
     compile "com.h2database:h2:1.4.197"
     compile "org.jetbrains.exposed:exposed:0.11.2"
     compile 'com.zaxxer:HikariCP:3.3.0'
-    testCompile 'org.koin:koin-test:1.0.2'
+    testCompile "org.koin:koin-test:$koin_version"
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
     testCompile 'junit:junit:4.11'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
